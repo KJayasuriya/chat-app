@@ -1,6 +1,6 @@
 <script setup>
 import {ref, watch, computed, nextTick} from 'vue'
-
+const API_URL = 'https://chat-app-backend-9mfo.onrender.com'
 const props = defineProps({
     contact: Object,
     currentUser: String,
@@ -50,7 +50,7 @@ async function loadMessages(){
     try{
 
         const response = await fetch(
-            `http://localhost:8080/api/chat/${encodeURIComponent(props.currentUser)}/${encodeURIComponent(username)}`
+            `${API_URL}/api/chat/${encodeURIComponent(props.currentUser)}/${encodeURIComponent(username)}`
         )
 
         if(!response.ok){
@@ -102,7 +102,7 @@ async function sendMessage(){
 
     try{
 
-        const response = await fetch('http://localhost:8080/api/chat',{
+        const response = await fetch(`${API_URL}/api/chat`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

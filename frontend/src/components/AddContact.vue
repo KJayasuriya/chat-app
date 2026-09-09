@@ -1,5 +1,6 @@
 <script setup>
     import {ref} from 'vue'
+    const API_URL = 'https://chat-app-backend-9mfo.onrender.com'
     const props = defineProps({
         currentUser:String
     })
@@ -12,7 +13,7 @@
         }
         
         try{
-            const response = await fetch('http://localhost:8080/api/contacts',{
+            const response = await fetch(`${API_URL}/api/contacts`,{
                 method:'POST',
                 headers:{
                     'Content-Type':'application/json'

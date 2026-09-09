@@ -1,4 +1,5 @@
 <script setup>
+  const API_URL = 'https://chat-app-backend-9mfo.onrender.com'
   import {ref, computed} from 'vue'
   import Register from './components/Register.vue';
   import AddContact from './components/AddContact.vue';
@@ -6,7 +7,7 @@
   import Login from './components/Login.vue';
   async function getUser(data){
     try{
-      const response = await fetch('http://localhost:8080/api/users',{
+      const response = await fetch(`${API_URL}/api/users`,{
         method:'POST',
         headers:{
           'Content-Type':'application/json'
@@ -43,7 +44,7 @@
 
     try{
 
-        const response = await fetch('http://localhost:8080/api/users/login',{
+        const response = await fetch(`${API_URL}/api/users/login`,{
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -88,7 +89,7 @@ function logout(){
 
   async function loadContacts(){
     try{
-      const response = await fetch(`http://localhost:8080/api/contacts/${encodeURIComponent(currentUser.value)}`)
+      const response = await fetch(`${API_URL}/api/contacts/${encodeURIComponent(currentUser.value)}`)
       if(!response.ok){
         alert('Unable to load contacts');
         return;
@@ -99,7 +100,7 @@ function logout(){
       await Promise.all(
         data.map(async (contact) =>{
           const response = await fetch(
-            `http://localhost:8080/api/chat/${encodeURIComponent(currentUser.value)}/${encodeURIComponent(contact.username)}`
+            `${API_URL}/api/chat/${encodeURIComponent(currentUser.value)}/${encodeURIComponent(contact.username)}`
           )
           if(response.ok){
             conversations.value[contact.username] = await response.json();
