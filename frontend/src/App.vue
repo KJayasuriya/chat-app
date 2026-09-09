@@ -143,7 +143,7 @@ function logout(){
       <h1 v-else-if="addContact">Add Contact</h1>
       <h1 v-else>ChatLoop</h1>
 
-    <div v-if="!showLogin && seeChat">
+    <div class="nav-actions" v-if="!showLogin && seeChat">
       <button @click="addContact = true" class="contact-btn">Add Contact</button>
       <button class="log-out-btn" @click="logout">Log Out</button>
     </div>
@@ -263,6 +263,11 @@ function logout(){
     color:white;
     padding: 15px;
     gap: 20px;
+  }
+  .nav-actions{
+      display:flex;
+      gap:15px;
+      align-items:center;
   }
   .log-out-btn{
     background-color: oklch(62.793% 0.25768 29.223);
