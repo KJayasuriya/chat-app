@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/contacts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "https://chatloop-web.netlify.app")
 public class ContactController {
     private final ContactService contactService;
 
