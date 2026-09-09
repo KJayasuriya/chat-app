@@ -35,7 +35,7 @@
     contacts.value.push(data);
     addContact.value = false;
   }
-  const seeChat = ref(true);
+  const seeChat = ref(false);
   const mobileChat = ref(false);
   const addContact = ref(false);
   const showRegisterForm = computed(()=>!showLogin.value && !seeChat.value && !addContact.value);
@@ -141,12 +141,12 @@ function logout(){
       <h1 v-if="showLogin">Login</h1>
       <h1 v-else-if="showRegisterForm">Register/Sign Up</h1>
       <h1 v-else-if="addContact">Add Contact</h1>
-      <h1 v-else>Chat App</h1>
+      <h1 v-else>ChatLoop</h1>
 
-      <div v-if="!showLogin && !showRegisterForm">
-          <button @click="addContact = true" class="contact-btn">Add Contact</button>
-          <button class="log-out-btn" @click="logout">Log Out</button>
-      </div>
+    <div v-if="!showLogin && seeChat">
+      <button @click="addContact = true" class="contact-btn">Add Contact</button>
+      <button class="log-out-btn" @click="logout">Log Out</button>
+    </div>
     </nav>   
     <Login v-if = "showLogin" @login="login" @register="seeChat = false; showLogin = false"/>
     <Register v-if="showRegisterForm" @addUser="getUser" @login="showLoginForm"/>    
