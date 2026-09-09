@@ -138,17 +138,20 @@ function logout(){
 <template>
   <div id="app">
     <nav>
-      <h1 v-if="addContact === true">Add Contact</h1>
+      <h1 v-if="showLogin">Login</h1>
       <h1 v-else-if="showRegisterForm">Register/Sign Up</h1>
+      <h1 v-else-if="addContact">Add Contact</h1>
       <h1 v-else>Chat App</h1>
-      <button @click="addContact = true" class="contact-btn">Add Contact
-      </button>
-      <button class="log-out-btn" @click="logout">Log Out</button>
-    </nav>    
+
+      <div v-if="!showLogin && !showRegisterForm">
+          <button @click="addContact = true" class="contact-btn">Add Contact</button>
+          <button class="log-out-btn" @click="logout">Log Out</button>
+      </div>
+    </nav>   
     <Login v-if = "showLogin" @login="login" @register="seeChat = false; showLogin = false"/>
     <Register v-if="showRegisterForm" @addUser="getUser" @login="showLoginForm"/>    
     <AddContact v-if = "addContact === true" :currentUser="currentUser" @addContact="getContacts" @cancel="addContact = false"/>
-    <main v-if="!showLogin" :class="{ 'mobile-chat-active': mobileChat }">
+    <main v-if="!showLogin && seeChat && !addContact" :class="{ 'mobile-chat-active': mobileChat }">
     <div class="contact-list">
         <div
             v-for="contact in contacts"
@@ -162,9 +165,14 @@ function logout(){
             </div>
         </div>
     </div>
-
-    <ChatWindow id = "chat-window" v-if="!showLogin && !showRegisterForm" :contact="selectedContact" :currentUser="currentUser" :conversations = "conversations" @back="mobileChat = false"/>
-</main>
+    <ChatWindow
+    id="chat-window"
+    :contact="selectedContact"
+    :currentUser="currentUser"
+    :conversations="conversations"
+    @back="mobileChat = false"
+    />
+  </main>
   </div>
 </template>
 
