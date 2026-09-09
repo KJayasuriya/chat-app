@@ -1,93 +1,164 @@
 <script setup>
-    import {ref,watch, computed} from 'vue'
+import {ref, watch, computed, nextTick} from 'vue'
 
-    const props = defineProps({
-        contact: Object,
-        conversations: Object
-    })
-    const message = ref('')
-    
-    const currentMessages = computed(()=>{
-        if(!props.contact) return []
-        return props.conversations[props.contact.username] || []
-    })
-    watch(() => props.contact, (contact)=>{
-        if(contact && !props.conversations[contact.username]){
-            props.conversations[contact.username] = [];
-            saveConversations();
-        }
-    })
-    function saveConversations(){
-        localStorage.setItem('conversations', JSON.stringify(props.conversations))
-    }
-    function getLastMessage(contact){
-        const msgs = props.conversations[contact.username] || [];
-        if(msgs.length === 0) return 'No messages yet';
-        return msgs[msgs.length - 1].text;
-    }
-    function getTime(){
-        return new Date().toLocaleTimeString([],
-            {hour:'2-digit', minute:'2-digit'}
-        )
-    }
-    function sendMessage(){
-        const text = message.value.trim();
-        if(text === '' || !props.contact){
-            return;
-        }
-        const username = props.contact.username;
-        
-        props.conversations[username].push({
-            sender: 'You',
-            text:message.value,
-            time:getTime()
+const props = defineProps({
+    contact: Object,
+    currentUser: String,
+    conversations: Object
+})
+
+const emit = defineEmits(['back'])
+
+const message = ref('')
+const messagesContainer = ref(null)
+
+const currentMessages = computed(() => {
+    if(!props.contact) return []
+
+    const messages = props.conversations[props.contact.username] || []
+
+    return messages.map(msg => ({
+        ...msg,
+        sender: msg.sender === props.currentUser ? 'You' : msg.sender
+    }))
+})
+
+function scrollToBottom(){
+    if(messagesContainer.value){
+        messagesContainer.value.scrollTo({
+            top: messagesContainer.value.scrollHeight,
+            behavior: 'smooth'
         })
-        saveConversations()
-        message.value = '';
-        setTimeout(()=>{
-            const replies = [
-                'Hey! Got your message dude 😎',
-                'Haha yeah 😂',
-                'What are you doing bro?',
-                'Okay bro 👍',
-                'Damn 😂',
-                'Tell me more!',
-                'Really? 👀',
-                'Lol 😂',
-                'I was waiting for your message!',
-                'Yeah bro, I understand.'
-            ]
-            const randomReply = replies[Math.floor(Math.random() * replies.length)]
-            props.conversations[username].push({
-                sender:props.contact.username,
-                text:randomReply,
-                time: getTime()
-            })
-            saveConversations()
-        },1000)
     }
+}
+
+function getTime(){
+    return new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    })
+}
+
+async function loadMessages(){
+
+    if(!props.contact || !props.currentUser){
+        return
+    }
+
+    const username = props.contact.username
+
+    try{
+
+        const response = await fetch(
+            `http://localhost:8080/api/chat/${encodeURIComponent(props.currentUser)}/${encodeURIComponent(username)}`
+        )
+
+        if(!response.ok){
+            alert('Unable to load messages')
+            return
+        }
+
+        const messages = await response.json()
+
+        props.conversations[username] = messages
+
+        await nextTick()
+        scrollToBottom()
+
+    }catch(error){
+
+        console.error(error)
+        alert('Unable to connect to server')
+
+    }
+}
+
+watch(
+    () => props.contact,
+    (contact) => {
+        if(contact){
+            loadMessages()
+        }
+    },
+    {immediate: true}
+)
+
+async function sendMessage(){
+
+    const text = message.value.trim()
+
+    if(text === '' || !props.contact){
+        return
+    }
+
+    const username = props.contact.username
+
+    const data = {
+        sender: props.currentUser,
+        receiver: username,
+        message: text,
+        time: getTime()
+    }
+
+    try{
+
+        const response = await fetch('http://localhost:8080/api/chat',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+
+        if(!response.ok){
+            const error = await response.text()
+            alert(error)
+            return
+        }
+
+        const savedMessage = await response.json()
+
+        if(!props.conversations[username]){
+            props.conversations[username] = []
+        }
+
+        props.conversations[username].push(savedMessage)
+
+        message.value = ''
+
+        await nextTick()
+        scrollToBottom()
+
+    }catch(error){
+
+        console.error(error)
+        alert('Unable to connect to server')
+
+    }
+}
 </script>
 
 <template>
     <section class="chat-window" v-if = "contact">
-        <header>
+        <div class="chat-header">
+            <button class="back-btn" @click="emit('back')">←</button>
             <h2>{{ contact.username }}</h2>
-            <strong>{{ contact.phone }}</strong>
-        </header>
-        <div class="messages">
+        </div>
+        <div class="messages" ref = "messagesContainer">
             <div class="message"  v-for="(msg,index) in currentMessages" :key = "index">
                 <div class="sent" v-if = "msg.sender === 'You'">
                     <h3>{{ msg.sender }}</h3>
-                    <p>{{ msg.text }}</p>
+                    <p>{{ msg.message }}</p>
                     <small>{{ msg.time }}</small>
                 </div>
                 <div class="received" v-else>
                     <h3>{{ msg.sender }}</h3>
-                    <p>{{ msg.text }}</p>
+                    <p>{{ msg.message }}</p>
                     <small>{{ msg.time }}</small>
                 </div>
             </div>
         </div>
+        <button class="scroll-bottom-btn" @click="scrollToBottom">↓</button>
         <form @submit.prevent="sendMessage" class="message-form">
             <input v-model="message" type = "text" placeholder = "Type a message">
             <button type="submit">🠝</button>
@@ -106,16 +177,34 @@
         display:flex;
         flex-direction:column;
         flex:1;
-        min-height:90vh;
+        min-height:0;
         background:url('./../assets/background-dark.png');
         border-radius:10px;
         overflow:hidden;
         color:black;
+        position:relative;
+    }
+    .chat-header{
+        display:flex;
+        align-items:center;
+        background:#159bc3;
+        gap:10px;
+    }
+    .back-btn{
+        display: none;
+        border:none;
+        font-weight:bold;
+        color:white;
+        background:none;
+        font-size: 1.8rem;
+        cursor:pointer;
     }
     .messages{
         flex:1;
+        min-height:0;
         margin-left:5%;
         padding:15px;
+        padding-bottom:120px;
         display:flex;
         flex-direction:column;
         gap:20px;
@@ -173,7 +262,7 @@
         left: -9px;
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
     }
-    header{
+    .chat-header{
         display:flex;
         justify-content:space-between;
         align-items:center;
@@ -181,18 +270,34 @@
         background:#159bc3;
         color:white;
     }
-
+    .scroll-bottom-btn{
+        position:absolute;
+        right:45%;
+        bottom:75px;
+        z-index:99;
+        border:none;
+        border-radius:50%;
+        width:40px;
+        height:40px;
+        background: #000000a2;;
+        border: 0.5px solid white;
+        color:white;
+        font-size:1.5rem;
+        cursor:pointer;
+    }
     .message-form{
-        margin: auto;
-        margin-bottom: 40px;
         background:white;
-        border-radius: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 5px;
-        padding: 5px;
-
+        border-radius:30px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:5px;
+        padding:5px;
+        position:absolute;
+        bottom:20px;
+        left:50%;
+        transform:translateX(-50%);
+        z-index:99;
     }
     .message-form input{
         padding: 5px;
@@ -213,5 +318,25 @@
     }
     .message-form button:active{
         transform: scale(0.9);
+    }
+    @media (max-width:768px){
+        .back-btn{
+            display:block;
+        }
+
+        .message-form{
+            width:80%;
+            bottom:20px;
+            position:fixed;
+            left:50%;
+            z-index:99;
+        }
+
+        .scroll-bottom-btn{
+            right: 45%;
+            bottom:80px;
+            position:fixed;
+            z-index:99;
+        }
     }
 </style>

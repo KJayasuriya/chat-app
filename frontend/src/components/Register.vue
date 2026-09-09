@@ -1,14 +1,13 @@
 <script setup>
     import { ref } from 'vue';
 
-    const name = ref('')
-    const phone = ref('')
+    const username = ref('')
     const pwd = ref('')
     const confirm = ref('')
-    const emit = defineEmits(['addUser']);
+    const emit = defineEmits(['addUser', 'login']);
     function signup(){
-        if(name.value.trim() === ''){
-            alert("Name should NOT be empty!");
+        if(username.value.trim() === ''){
+            alert("username should NOT be empty!");
             return;
         }
         if(pwd.value.trim() === '' || pwd.value.length < 8){
@@ -19,15 +18,13 @@
             alert('Please confirm the new password correctly');
             return;
         }
-        if(phone.value.length < 10){
-            alert('Phone must be 10 digits long!');
-            return;
-        }
         emit('addUser',{
-            name: name.value,
-            phone: phone.value,
+            username: username.value,
             password: pwd.value
         })
+        username.value = '';
+        pwd.value = '';
+        confirm.value = '';
     }
 </script>
 
@@ -35,15 +32,17 @@
     
     <form @submit.prevent="signup">
         <h2>Register</h2>
-        <label>User Name</label>
-        <input v-model="name" type="text" required>
-        <label>Phone Number:</label>
-        <input v-model="phone" type = "tel" required>
+        <label>User name</label>
+        <input v-model="username" type="text" required>
         <label>Password</label>
         <input v-model="pwd" type="password" required>
         <label>Confirm Password</label>
         <input v-model="confirm" type="password" required>
         <button type="submit">Sign Up</button>
+        <p>
+            Already have an account?
+            <button type="button" @click="emit('login')">Login</button>
+        </p>
     </form>
 </template>
 
@@ -58,6 +57,8 @@
         padding: 15px;
         border-radius: 10px;
         gap:10px;
+        box-shadow: 2px 5px 10px rgba(0,0,0,0.2);
+        margin:auto;
     }
     input{
         border-radius: 2px;
@@ -69,7 +70,7 @@
         border:none;
         outline: 1px solid #00a944;
     }
-    button{
+    form>button{
         background-color: #159bc3;
         color:white;
         font-weight: bold;
@@ -81,7 +82,14 @@
         cursor: pointer;
         transition: 0.3s;
     }
-    button:active{
+    form>button:active{
         transform: translateY(5px);
+    }
+    p>button{
+        background:none;
+        border:none;
+        color:#159bc3;
+        font-weight: bold;
+        cursor:pointer;
     }
 </style>

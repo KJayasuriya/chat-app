@@ -10,14 +10,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "chat")
-public class ChatModel {
-
+@Document(collection = "contacts")
+public class ContactModel {
     @Id
     private String id;
-
-    private String sender;
-    private String receiver;
-    private String message;
-    private String time;
+    private String owner;
+    private String username;
 }

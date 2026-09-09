@@ -4,24 +4,37 @@
         currentUser:String
     })
     const username = ref('');
-    const phone = ref('');
-    const emit = defineEmits(['addContact'])
-    function addContact(){
+    const emit = defineEmits(['addContact','cancel'])
+    async function addContact(){
         if(username.value.trim() === ''){
             alert("Username should NOT be empty!");
             return;
         }
-        if(phone.value.length < 10){
-            alert('Phone must be 10 digits long!');
-            return;
+        
+        try{
+            const response = await fetch('http://localhost:8080/api/contacts',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({
+                    owner:props.currentUser,
+                    username:username.value.trim()
+                })
+            })
+            if(!response.ok){
+                const error = await response.text();
+                alert(error);
+                return;
+            }
+            const contact = await response.json();
+            emit('addContact',contact);
+            username.value = '';
         }
-        emit('addContact',{
-            user: props.currentUser,
-            username: username.value,
-            phone: phone.value
-        })
-        username.value = '';
-        phone.value = '';
+        catch(error){
+            console.error(error);
+            alert('Unable to connect to server');
+        }
     }
 </script>
 
@@ -30,11 +43,8 @@
         <label>Username: 
             <input type ="text" placeholder="e.g. Arun" v-model="username" required>
         </label>
-        <label>Phone Number:
-            <input type = "tel" v-model="phone" placeholder="e.g. 9876543210" required>
-        </label>
         <button type = "submit">Add</button>
-        <button @click.prevent="$emit('addContact',null)">Cancel</button>
+        <button type="button" @click="$emit('cancel')">Cancel</button>
     </form>
 </template>
 

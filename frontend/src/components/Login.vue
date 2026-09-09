@@ -1,88 +1,118 @@
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 
-const name = ref('')
-const phone = ref('')
-const pwd = ref('')
+const username = ref('')
+const password = ref('')
+
+const emit = defineEmits(['login', 'register'])
 
 function login(){
-    if(name.value.trim() === ''){
-        alert('Username cannot be empty!')
+    if(username.value.trim() === '' || password.value.trim() === ''){
+        alert('Username and password are required!')
         return
     }
 
-    if(phone.value.length !== 10){
-        alert('Phone must be 10 digits long!')
-        return
-    }
-
-    if(pwd.value.trim() === ''){
-        alert('Password cannot be empty!')
-        return
-    }
-
-    console.log({
-        name: name.value,
-        phone: phone.value,
-        password: pwd.value
+    emit('login', {
+        username: username.value,
+        password: password.value
     })
 }
 </script>
 
 <template>
-    <form @submit.prevent="login">
+    <form class="login-form" @submit.prevent="login">
         <h2>Login</h2>
 
-        <label>User Name</label>
-        <input v-model="name" type="text" required>
+        <label>
+            Username:
+            <input
+                type="text"
+                v-model="username"
+                placeholder="Enter username"
+                required
+            >
+        </label>
 
-        <label>Phone Number</label>
-        <input v-model="phone" type="tel" required>
-
-        <label>Password</label>
-        <input v-model="pwd" type="password" required>
+        <label>
+            Password:
+            <input
+                type="password"
+                v-model="password"
+                placeholder="Enter password"
+                required
+            >
+        </label>
 
         <button type="submit">Login</button>
+
+        <p>
+            Don't have an account?
+            <button type="button" @click="emit('register')">
+                Register
+            </button>
+        </p>
     </form>
 </template>
 
 <style scoped>
-form{
+.login-form{
     display:flex;
     flex-direction:column;
-    margin:auto;
-    width:400px;
+    gap:15px;
     background:white;
-    padding:15px;
+    padding:25px;
+    width:fit-content;
+    min-width:300px;
+    margin:auto;
     border-radius:10px;
-    gap:10px;
+    color:black;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
 }
 
-input{
-    border-radius:2px;
-    border:.5px solid black;
+.login-form h2{
+    text-align:center;
+}
+
+.login-form label{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.login-form input{
+    padding:8px;
+    border:1px solid #999;
+    border-radius:5px;
     outline:none;
-    padding:5px;
 }
 
-input:focus{
-    outline:1px solid #00a944;
+.login-form input:focus{
+    border-color:#159bc3;
 }
 
-button{
-    background-color:#159bc3;
+.login-form > button{
+    padding:8px;
+    border:none;
+    border-radius:5px;
+    background:#159bc3;
     color:white;
     font-weight:bold;
-    width:fit-content;
-    padding:8px 15px;
-    border:none;
-    border-radius:10px;
-    margin:auto;
     cursor:pointer;
-    transition:.3s;
 }
 
-button:active{
-    transform:translateY(5px);
+.login-form > button:hover{
+    background:#1285a8;
+}
+
+.login-form p{
+    text-align:center;
+}
+
+.login-form p button{
+    border:none;
+    background:none;
+    color:#159bc3;
+    font-weight:bold;
+    cursor:pointer;
 }
 </style>
