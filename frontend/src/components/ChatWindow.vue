@@ -161,7 +161,7 @@ async function sendMessage(){
         <button class="scroll-bottom-btn" @click="scrollToBottom">↓</button>
         <form @submit.prevent="sendMessage" class="message-form">
             <input v-model="message" type = "text" placeholder = "Type a message">
-            <button type="submit">🠝</button>
+            <button type="submit" class="send-btn">↑</button>
         </form>
     </section>
     <section v-else class="no-chat">
@@ -318,6 +318,10 @@ async function sendMessage(){
     }
     .message-form button:active{
         transform: scale(0.9);
+    }
+    .send-btn {
+        font-size: 24px;
+        font-weight: bold;
     }
     @media (max-width:768px){
         .back-btn{
