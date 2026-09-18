@@ -298,9 +298,13 @@ async function sendMessage(){
         left:50%;
         transform:translateX(-50%);
         z-index:99;
+        width: 40%;
     }
     .message-form input{
-        padding: 5px;
+        padding: 8px 16px;
+        flex: 1;
+        min-width: 0;
+        font-size: 1rem;
         border:none;
         outline:none;
     }
