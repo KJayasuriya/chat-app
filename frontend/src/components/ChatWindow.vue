@@ -216,7 +216,7 @@ async function sendMessage(){
     }
     .sent, .received{
         padding: 10px;
-        width: clamp(8rem,300px,15rem);
+        width: clamp(260px, 75%, 720px);
         overflow-wrap: break-word;
         word-break: break-word;
         white-space: pre-wrap;

@@ -130,7 +130,13 @@ function logout(){
       if(messages.length === 0){
         return 'No messages yet'
       }
-      return messages[messages.length - 1].message;
+      const lastMessage = messages[messages.length - 1].message;
+      const maxLength = 50;
+
+      if(lastMessage.length > maxLength){
+        return lastMessage.slice(0,maxLength).trimEnd() + '...';
+      }
+      return lastMessage;
   }
   
 </script>
